@@ -1,0 +1,418 @@
+@prefix sdw: <http://example.com/sdw/>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix qb: <http://purl.org/linked-data/cube#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix qb4o: <http://purl.org/qb4olap/cubes#>.
+@prefix dct: <http://purl.org/dc/terms/>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix bus: <http://extbi.lab.aau.dk/ontology/business/>.
+@prefix xml: <http://www.w3.org/XML/1998/namespace>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix dbpcat: <http://dbpedia.org/resource/Category:>.
+@prefix dbpedia: <http://dbpedia.org/resource/>.
+@prefix business: <http://extbi.lab.aau.dk/ontology/sdw/>.
+@prefix mdStructure: <http://bike-csecu.com/datasets/energy/abox/mdStructure#>.
+@prefix mdAttribute: <http://bike-csecu.com/datasets/energy/abox/mdAttribute#>.
+@prefix mdProperty: <http://bike-csecu.com/datasets/energy/abox/mdProperty#>.
+@prefix dataset: <http://bike-csecu.com/datasets/energy/abox/data#>.
+@prefix onto: <http://bike-csecu.com/datasets/energy/abox/>.
+
+#CUBES
+
+mdStructure:DemandLoadShedCube a qb:DataStructureDefinition;
+	dct:conformsTo <http://purl.org/qb4olap/cubes>;
+	qb:component [ qb4o:dimension mdProperty:NationalGrid; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:dimension mdProperty:TimePeriod; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb:measure mdProperty:LoadShed; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum];
+	qb:component [ qb:measure mdProperty:Demand; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum].
+
+mdStructure:EnergyGenerationCube a qb:DataStructureDefinition;
+	dct:conformsTo <http://purl.org/qb4olap/cubes>;
+	qb:component [ qb4o:dimension mdProperty:TimePeriod; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:dimension mdProperty:NationalGrid; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:dimension sdw:PowerPlant; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb:measure mdProperty:EnergyGenerated; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum].
+
+mdStructure:LoadCube a qb:DataStructureDefinition;
+	dct:conformsTo <http://purl.org/qb4olap/cubes>;
+	qb:component [ qb4o:dimension mdProperty:TimePeriod; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:dimension mdProperty:GridSubstation; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:dimension mdProperty:NationalGrid; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb:measure mdProperty:MaxLoad; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum].
+
+
+#CUBOIDS
+
+mdStructure:DemandLoadShedCuboid a qb:DataStructureDefinition;
+	qb4o:isCuboidOf mdStructure:DemandLoadShedCube;
+	dct:conformsTo <http://purl.org/qb4olap/cubes>;
+	qb:component [ qb4o:level mdProperty:Area; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb:measure mdProperty:Demand; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum];
+	qb:component [ qb:measure mdProperty:LoadShed; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum];
+	qb:component [ qb4o:level mdProperty:Day; qb4o:cardinality qb4o:OneToMany].
+
+mdStructure:LoadCuboid a qb:DataStructureDefinition;
+	qb4o:isCuboidOf mdStructure:LoadCube;
+	dct:conformsTo <http://purl.org/qb4olap/cubes>;
+	qb:component [ qb4o:level mdProperty:Area; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:level mdProperty:Day; qb4o:cardinality qb4o:OneToOne];
+	qb:component [ qb4o:level mdProperty:Substation; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb:measure mdProperty:MaxLoad; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum].
+
+mdStructure:EnergyGenerationCuboid a qb:DataStructureDefinition;
+	qb4o:isCuboidOf mdStructure:EnergyGenerationCube;
+	dct:conformsTo <http://purl.org/qb4olap/cubes>;
+	qb:component [ qb:measure mdProperty:EnergyGenerated; qb4o:aggregateFunction qb4o:avg, qb4o:count, qb4o:min, qb4o:max, qb4o:sum];
+	qb:component [ qb4o:level mdProperty:PowerStation; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:level mdProperty:Area; qb4o:cardinality qb4o:OneToMany];
+	qb:component [ qb4o:level mdProperty:Day; qb4o:cardinality qb4o:OneToMany].
+
+
+#DATASETS
+
+dataset:DemandLoadShedDataset a qb:DataSet;
+	qb:structure mdStructure:DemandLoadShedCuboid.
+
+dataset:EnergyGenerationDataset a qb:DataSet;
+	qb:structure mdStructure:EnergyGenerationCuboid.
+
+dataset:LoadDataset a qb:DataSet;
+	qb:structure mdStructure:LoadCuboid.
+
+
+#DIMENSIONS
+
+mdProperty:GridSubstation a qb:DimensionProperty;
+	rdfs:label "Grid substation dimension represents different substations that handle load at different levels"@en;
+	qb4o:hasHierarchy mdStructure:SubstationVoltageLevel;
+	rdfs:range xsd:string.
+
+mdProperty:NationalGrid a qb:DimensionProperty;
+	rdfs:label "National grid represents how energy entities change across areas, zones, and country grid"@en;
+	qb4o:hasHierarchy mdStructure:Grid;
+	rdfs:range xsd:string.
+
+mdProperty:PowerPlant a qb:DimensionProperty;
+	rdfs:label "Power Plant represents the power stations that produce energy using fuel"@en;
+	qb4o:hasHierarchy mdStructure:PowerStationFuelSource;
+	rdfs:range xsd:string.
+
+mdProperty:TimePeriod a qb:DimensionProperty;
+	rdfs:label "Time period dimension shows how load, energy generation, and demand change across time"@en;
+	qb4o:hasHierarchy mdStructure:Date;
+	rdfs:range xsd:string.
+
+
+#HIERARCHIES
+
+mdStructure:Date a qb4o:Hierarchy;
+	rdfs:label "Date Hierarchy"@en;
+	qb4o:inDimension mdProperty:TimePeriod;
+	qb4o:hasLevel mdProperty:Year, mdProperty:Month, mdProperty:Day.
+
+mdStructure:Grid a qb4o:Hierarchy;
+	rdfs:label "Grid Hierarchy"@en;
+	qb4o:inDimension mdProperty:NationalGrid;
+	qb4o:hasLevel mdProperty:CountryGrid, mdProperty:Zone, mdProperty:Area.
+
+mdStructure:PowerStationFuelSource a qb4o:Hierarchy;
+	rdfs:label "Power Station Fuel Source Hierarchy"@en;
+	qb4o:inDimension mdProperty:PowerPlant;
+	qb4o:hasLevel mdProperty:FuelSource, mdProperty:PowerStation.
+
+mdStructure:SubstationVoltageLevel a qb4o:Hierarchy;
+	rdfs:label "Substation Voltage Level Hierarchy"@en;
+	qb4o:inDimension mdProperty:GridSubstation;
+	qb4o:hasLevel mdProperty:VoltageLevel, mdProperty:Substation.
+
+
+#HIERARCHY STEPS
+
+_:hs1 a qb4o:HierarchyStep;
+	qb4o:inHierarchy mdStructure:Date;
+	qb4o:childLevel mdProperty:Month;
+	qb4o:parentLevel mdProperty:Year;
+	qb4o:pcCardinality qb4o:OneToMany;
+	qb4o:rollup mdAttribute:InYear.
+
+_:hs2 a qb4o:HierarchyStep;
+	qb4o:inHierarchy mdStructure:Date;
+	qb4o:childLevel mdProperty:Day;
+	qb4o:parentLevel mdProperty:Month;
+	qb4o:pcCardinality qb4o:OneToMany;
+	qb4o:rollup mdAttribute:InMonth.
+
+_:hs3 a qb4o:HierarchyStep;
+	qb4o:inHierarchy mdStructure:Grid;
+	qb4o:childLevel mdProperty:Zone;
+	qb4o:parentLevel mdProperty:CountryGrid;
+	qb4o:pcCardinality qb4o:OneToMany;
+	qb4o:rollup mdAttribute:InCountryGrid.
+
+_:hs4 a qb4o:HierarchyStep;
+	qb4o:inHierarchy mdStructure:Grid;
+	qb4o:childLevel mdProperty:Area;
+	qb4o:parentLevel mdProperty:Zone;
+	qb4o:pcCardinality qb4o:OneToMany;
+	qb4o:rollup mdAttribute:InZone.
+
+_:hs5 a qb4o:HierarchyStep;
+	qb4o:inHierarchy mdStructure:SubstationVoltageLevel;
+	qb4o:childLevel mdProperty:Substation;
+	qb4o:parentLevel mdProperty:VoltageLevel;
+	qb4o:pcCardinality qb4o:OneToMany;
+	qb4o:rollup mdAttribute:InVoltageLevel.
+
+_:hs6 a qb4o:HierarchyStep;
+	qb4o:inHierarchy mdStructure:PowerStationFuelSource;
+	qb4o:childLevel mdProperty:PowerStation;
+	qb4o:parentLevel mdProperty:FuelSource;
+	qb4o:pcCardinality qb4o:OneToMany;
+	qb4o:rollup mdAttribute:InFuelSource.
+
+
+#LEVELS
+
+mdProperty:Area a qb4o:LevelProperty;
+	rdfs:range onto:Area;
+	qb4o:hasAttribute mdAttribute:InZone, mdAttribute:AreaName, mdAttribute:AreaId;
+	rdfs:label "Grid areas"@en.
+
+mdProperty:CountryGrid a qb4o:LevelProperty;
+	rdfs:range onto:CountryGrid;
+	qb4o:hasAttribute mdAttribute:CountryRegion, mdAttribute:CountryName, mdAttribute:CountryGridId, mdAttribute:CountryCode;
+	rdfs:label "Country contains the grid zones"@en.
+
+mdProperty:Day a qb4o:LevelProperty;
+	rdfs:range onto:Day;
+	qb4o:hasAttribute mdAttribute:InMonth, mdAttribute:Holiday, mdAttribute:DayOfWeek, mdAttribute:DayNumber, mdAttribute:DayId;
+	rdfs:label "Day of the time period"@en.
+
+mdProperty:FuelSource a qb4o:LevelProperty;
+	rdfs:range onto:FuelSource;
+	qb4o:hasAttribute mdAttribute:PrimaryFuelSource, mdAttribute:FuelType, mdAttribute:FuelName, mdAttribute:FuelId;
+	rdfs:label "Fuel used by power station to generate electric energy"@en.
+
+mdProperty:Month a qb4o:LevelProperty;
+	rdfs:range onto:Month;
+	qb4o:hasAttribute mdAttribute:Season, mdAttribute:MonthNumber, mdAttribute:MonthName, mdAttribute:MonthId, mdAttribute:InYear;
+	rdfs:label "Month of the time period"@en.
+
+mdProperty:PowerStation a qb4o:LevelProperty;
+	rdfs:range onto:PowerStation;
+	qb4o:hasAttribute mdAttribute:PowerStationName, mdAttribute:PowerStationId, mdAttribute:InFuelSource;
+	rdfs:label "Power station generating electric energy"@en.
+
+mdProperty:Substation a qb4o:LevelProperty;
+	rdfs:range onto:Substation;
+	qb4o:hasAttribute mdAttribute:SubstationName, mdAttribute:SubstationId, mdAttribute:InVoltageLevel;
+	rdfs:label "Grid substations handle loads by stepping up and down by transformer"@en.
+
+mdProperty:VoltageLevel a qb4o:LevelProperty;
+	rdfs:range onto:VoltageLevel;
+	qb4o:hasAttribute mdAttribute:VoltageLevelName, mdAttribute:VoltageLevelId, mdAttribute:NominalVoltage;
+	rdfs:label "Voltage level that the grid substations can handle"@en.
+
+mdProperty:Year a qb4o:LevelProperty;
+	rdfs:range onto:Year;
+	qb4o:hasAttribute mdAttribute:YearName, mdAttribute:YearId;
+	rdfs:label "Year of the time period"@en.
+
+mdProperty:Zone a qb4o:LevelProperty;
+	rdfs:range onto:Zone;
+	qb4o:hasAttribute mdAttribute:ZoneName, mdAttribute:ZoneId, mdAttribute:InCountryGrid;
+	rdfs:label "East and west zones that contain grid areas like Dhaka, Chittagong, etc."@en.
+
+
+#ATTRIBUTES
+
+mdAttribute:AreaId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique area is identified by an id"@en.
+
+mdAttribute:AreaName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique area is identified by a name"@en.
+
+mdAttribute:CountryCode a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique country grid is identified by a code"@en.
+
+mdAttribute:CountryGridId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique country grid is identified by an id"@en.
+
+mdAttribute:CountryName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique country grid is identified by a name"@en.
+
+mdAttribute:CountryRegion a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique country grid is identified by a region"@en.
+
+mdAttribute:DayId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique day is identified by an id"@en.
+
+mdAttribute:DayNumber a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique day is identified by a number"@en.
+
+mdAttribute:DayOfWeek a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique day is identified by a day of the week"@en.
+
+mdAttribute:FuelId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique fuel source is identified by an id"@en.
+
+mdAttribute:FuelName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique fuel source is identified by a name"@en.
+
+mdAttribute:FuelType a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique fuel source is identified by a type"@en.
+
+mdAttribute:Holiday a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique day is identified by whether it is a holiday or not"@en.
+
+mdAttribute:InCountryGrid a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:CountryGrid;
+	rdfs:label "Each unique zone is identified by the country grid it is part of"@en.
+
+mdAttribute:InFuelSource a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:FuelSource;
+	rdfs:label "Each unique power station is identified by the fuel source it is using"@en.
+
+mdAttribute:InMonth a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:Month;
+	rdfs:label "Each unique day is identified by the month it is part of"@en.
+
+mdAttribute:InVoltageLevel a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:VoltageLevel;
+	rdfs:label "Each unique substation is identified by the voltage level it is part of"@en.
+
+mdAttribute:InYear a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:Year;
+	rdfs:label "Each unique month is identified by the year it is part of"@en.
+
+mdAttribute:InZone a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:Zone;
+	rdfs:label "Each Area is under a zone it is part of"@en.
+
+mdAttribute:MonthId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique month is identified by an id"@en.
+
+mdAttribute:MonthName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique month is identified by a name"@en.
+
+mdAttribute:MonthNumber a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique month is identified by a number"@en.
+
+mdAttribute:NominalVoltage a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique voltage level is identified by a nominal voltage"@en.
+
+mdAttribute:PowerStationId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique power station is identified by an id"@en.
+
+mdAttribute:PowerStationName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique power station is identified by a name"@en.
+
+mdAttribute:PrimaryFuelSource a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique fuel source is identified by whether it is a primary source or not"@en.
+
+mdAttribute:Season a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique month is identified by the season it falls in"@en.
+
+mdAttribute:SubstationId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique substation is identified by an id"@en.
+
+mdAttribute:SubstationName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique substation is identified by a name"@en.
+
+mdAttribute:VoltageLevelId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique voltage level is identified by an id"@en.
+
+mdAttribute:VoltageLevelName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique voltage level is identified by a name"@en.
+
+mdAttribute:YearId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique year is identified by an id"@en.
+
+mdAttribute:YearName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique year is identified by a name"@en.
+
+mdAttribute:ZoneId a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique zone is identified by an id"@en.
+
+mdAttribute:ZoneName a qb4o:LevelAttribute;
+	rdfs:range xsd:string;
+	rdfs:label "Each unique zone is identified by a name"@en.
+
+
+#ROLLUP RELATIONSHIPS
+
+mdAttribute:InCountryGrid a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:CountryGrid;
+	rdfs:label "Each unique zone is identified by the country grid it is part of"@en.
+
+mdAttribute:InFuelSource a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:FuelSource;
+	rdfs:label "Each unique power station is identified by the fuel source it is using"@en.
+
+mdAttribute:InMonth a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:Month;
+	rdfs:label "Each unique day is identified by the month it is part of"@en.
+
+mdAttribute:InVoltageLevel a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:VoltageLevel;
+	rdfs:label "Each unique substation is identified by the voltage level it is part of"@en.
+
+mdAttribute:InYear a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:Year;
+	rdfs:label "Each unique month is identified by the year it is part of"@en.
+
+mdAttribute:InZone a qb4o:LevelAttribute, qb4o:RollupProperty;
+	rdfs:range onto:Zone;
+	rdfs:label "Each Area is under a zone it is part of"@en.
+
+
+#MEASURES
+
+mdProperty:Demand a qb:MeasureProperty;
+	rdfs:label "Electricity demand of the consumer"@en;
+	rdfs:range xsd:float.
+
+mdProperty:EnergyGenerated a qb:MeasureProperty;
+	rdfs:label "Energy generated by power station"@en;
+	rdfs:range xsd:float.
+
+mdProperty:LoadShed a qb:MeasureProperty;
+	rdfs:label "Mitigates blackout risk via controlled reduction"@en;
+	rdfs:range xsd:float.
+
+mdProperty:MaxLoad a qb:MeasureProperty;
+	rdfs:label "Maximum serve by different substations"@en;
+	rdfs:range xsd:float.
+
+
+
