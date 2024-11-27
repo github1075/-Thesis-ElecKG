@@ -1,0 +1,55 @@
+what is the question of the query in smartly:PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX md: <http://bike-csecu.com/datasets/energy/abox/mdProperty#>
+
+SELECT ?areaName ?wikidata ?monthName 
+       (SUM(xsd:decimal(?demand)) AS ?totalDemand) 
+       (SUM(xsd:decimal(?loadShed)) AS ?totalLoadShed) 
+       ?pop
+       (SUM(xsd:decimal(?demand)) / ?pop AS ?demandPerCapita)
+       (SUM(xsd:decimal(?loadShed)) / ?pop AS ?loadShedPerCapita)
+       ((SUM(xsd:decimal(?loadShed)) / SUM(xsd:decimal(?demand))) * 100 AS ?loadShedPercentage)
+       (AVG(xsd:decimal(?demand)) AS ?avgDemand)
+       (AVG(xsd:decimal(?loadShed)) AS ?avgLoadShed)
+       (SUM(xsd:decimal(?loadShed)) / (SUM(xsd:decimal(?demand)) + SUM(xsd:decimal(?loadShed))) AS ?demandToLoadShedRatio)
+WHERE {
+  # Match observations in the DemandLoadShedDataset
+  ?obs a qb:Observation ;
+       md:Area ?area ;
+       md:Day ?day ;
+       md:Demand ?demand ;
+       md:LoadShed ?loadShed ;
+       qb:dataSet <http://bike-csecu.com/datasets/energy/abox/data#DemandLoadShedDataset> .
+
+  # Fetch Day -> Month -> Year hierarchy
+  ?day a <http://purl.org/qb4olap/cubes#LevelMember> ;
+       <http://purl.org/qb4olap/cubes#memberOf> <http://bike-csecu.com/datasets/energy/abox/mdProperty#Day> ;
+       <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InMonth> ?month .
+
+  ?month a <http://purl.org/qb4olap/cubes#LevelMember> ;
+          <http://purl.org/qb4olap/cubes#memberOf> <http://bike-csecu.com/datasets/energy/abox/mdProperty#Month> ;
+          <http://bike-csecu.com/datasets/energy/abox/mdAttribute#MonthName> ?monthName .
+
+  # Fetch area details and Wikidata link
+  ?area a <http://purl.org/qb4olap/cubes#LevelMember> ;
+         <http://purl.org/qb4olap/cubes#memberOf> <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> ;
+         <http://bike-csecu.com/datasets/energy/abox/mdAttribute#AreaName> ?areaName ;
+         <http://www.w3.org/2002/07/owl#sameAs> ?wikidata.
+
+  # Filter for Wikidata links
+  FILTER (STRSTARTS(STR(?wikidata), 'http://www.wikidata.org'))
+
+  # Fetch population data from Wikidata
+  SERVICE <https://query.wikidata.org/sparql> {
+    ?wikidata wdt:P1082 ?pop .
+  }
+
+  # Ensure numeric values for demand and loadShed
+  BIND(xsd:decimal(?demand) AS ?numericDemand)
+  BIND(xsd:decimal(?loadShed) AS ?numericLoadShed)
+}
+GROUP BY ?areaName ?wikidata ?monthName ?pop
+ORDER BY ?monthName ?areaName
+
+

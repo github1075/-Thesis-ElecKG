@@ -1,0 +1,22 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX qb4o: <http://purl.org/qb4olap/cubes#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT ?PowerPlant_PowerStationName ?PowerPlant_FuelSource ?TimePeriod_Season (AVG(<http://www.w3.org/2001/XMLSchema#float>(?m1)) as ?EnergyGenerated_avg) 
+WHERE {
+?o a qb:Observation .
+?o qb:dataSet <http://bike-csecu.com/datasets/energy/abox/data#EnergyGenerationDataset> .
+?o <http://bike-csecu.com/datasets/energy/abox/mdProperty#EnergyGenerated> ?m1 .
+?o <http://bike-csecu.com/datasets/energy/abox/mdProperty#PowerStation> ?PowerPlant_PowerStation .
+?PowerPlant_PowerStation qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#PowerStation> .
+?PowerPlant_PowerStation <http://bike-csecu.com/datasets/energy/abox/mdAttribute#PowerStationName> ?PowerPlant_PowerStationName .
+?PowerPlant_PowerStation <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InFuelSource> ?PowerPlant_FuelSource .
+?PowerPlant_FuelSource qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#FuelSource> .
+?PowerPlant_FuelSource <http://bike-csecu.com/datasets/energy/abox/mdAttribute#PrimaryFuelSource> ?FuelSource_PrimaryFuelSource .
+?o <http://bike-csecu.com/datasets/energy/abox/mdProperty#Day> ?TimePeriod_Day .
+?TimePeriod_Day qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Day> .
+?TimePeriod_Day <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InMonth> ?TimePeriod_Month .
+?TimePeriod_Month qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Month> .
+?TimePeriod_Month <http://bike-csecu.com/datasets/energy/abox/mdAttribute#Season> ?TimePeriod_Season .
+FILTER (REGEX (?FuelSource_PrimaryFuelSource, "Hydro", "i"))}
+GROUP BY ?PowerPlant_PowerStationName ?PowerPlant_FuelSource ?TimePeriod_Season
+ORDER BY ?PowerPlant_PowerStationName ?PowerPlant_FuelSource ?TimePeriod_Season

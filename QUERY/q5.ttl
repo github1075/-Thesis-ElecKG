@@ -1,0 +1,15 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX qb4o: <http://purl.org/qb4olap/cubes#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT ?NationalGrid_AreaName (MAX(<http://www.w3.org/2001/XMLSchema#float>(?m1)) as ?LoadShed_max) 
+WHERE {
+?o a qb:Observation .
+?o qb:dataSet <http://bike-csecu.com/datasets/energy/abox/data#DemandLoadShedDataset> .
+?o <http://bike-csecu.com/datasets/energy/abox/mdProperty#LoadShed> ?m1 .
+?o <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> ?NationalGrid_Area .
+?NationalGrid_Area <http://bike-csecu.com/datasets/energy/abox/mdAttribute#AreaName> ?Area_AreaName .
+?NationalGrid_Area qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> .
+?NationalGrid_Area <http://bike-csecu.com/datasets/energy/abox/mdAttribute#AreaName> ?NationalGrid_AreaName .
+FILTER (REGEX (?Area_AreaName, "Chittagong", "i"))}
+GROUP BY ?NationalGrid_AreaName
+ORDER BY ?NationalGrid_AreaName

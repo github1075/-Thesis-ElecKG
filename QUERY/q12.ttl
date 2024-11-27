@@ -1,0 +1,86 @@
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX qb4o: <http://purl.org/qb4olap/cubes#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT ?NationalGrid_ZoneName ?TimePeriod_YearName 
+       (MAX(<http://www.w3.org/2001/XMLSchema#float>(?demand)) AS ?Demand_max) 
+       (MAX(<http://www.w3.org/2001/XMLSchema#float>(?load)) AS ?MaxLoad_max)
+WHERE {
+    # Demand dataset
+    {
+        ?dObs a qb:Observation .
+        ?dObs qb:dataSet <http://bike-csecu.com/datasets/energy/abox/data#DemandLoadShedDataset> .
+        ?dObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#Demand> ?demand .
+        ?dObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> ?NationalGrid_Area .
+    }
+    UNION
+    # Load dataset
+    {
+        ?lObs a qb:Observation .
+        ?lObs qb:dataSet <http://bike-csecu.com/datasets/energy/abox/data#LoadDataset> .
+        ?lObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#MaxLoad> ?load .
+        ?lObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> ?NationalGrid_Area .
+    }
+
+    # Common properties
+    ?NationalGrid_Area qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> .
+    ?NationalGrid_Area <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InZone> ?NationalGrid_Zone .
+    ?NationalGrid_Zone qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Zone> .
+    ?NationalGrid_Zone <http://bike-csecu.com/datasets/energy/abox/mdAttribute#ZoneName> ?NationalGrid_ZoneName .
+
+    # Time properties
+    ?TimePeriod_Day qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Day> .
+    ?TimePeriod_Day <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InMonth> ?TimePeriod_Month .
+    ?TimePeriod_Month qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Month> .
+    ?TimePeriod_Month <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InYear> ?TimePeriod_Year .
+    ?TimePeriod_Year qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Year> .
+    ?TimePeriod_Year <http://bike-csecu.com/datasets/energy/abox/mdAttribute#YearId> ?Year_YearId .
+    ?TimePeriod_Year <http://bike-csecu.com/datasets/energy/abox/mdAttribute#YearName> ?TimePeriod_YearName .
+
+    # Filter for the year 2023
+    FILTER (REGEX (?Year_YearId, "2023", "i"))
+}
+GROUP BY ?NationalGrid_ZoneName ?TimePeriod_YearName
+ORDER BY ?NationalGrid_ZoneName ?TimePeriod_YearName
+PREFIX qb: <http://purl.org/linked-data/cube#>
+PREFIX qb4o: <http://purl.org/qb4olap/cubes#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT ?NationalGrid_ZoneName ?TimePeriod_YearName 
+       (MAX(<http://www.w3.org/2001/XMLSchema#float>(?demand)) AS ?Demand_max) 
+       (MAX(<http://www.w3.org/2001/XMLSchema#float>(?load)) AS ?MaxLoad_max)
+WHERE {
+    # Demand dataset
+    {
+        ?dObs a qb:Observation .
+        ?dObs qb:dataSet <http://bike-csecu.com/datasets/energy/abox/data#DemandLoadShedDataset> .
+        ?dObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#Demand> ?demand .
+        ?dObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> ?NationalGrid_Area .
+    }
+    UNION
+    # Load dataset
+    {
+        ?lObs a qb:Observation .
+        ?lObs qb:dataSet <http://bike-csecu.com/datasets/energy/abox/data#LoadDataset> .
+        ?lObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#MaxLoad> ?load .
+        ?lObs <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> ?NationalGrid_Area .
+    }
+
+    # Common properties
+    ?NationalGrid_Area qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Area> .
+    ?NationalGrid_Area <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InZone> ?NationalGrid_Zone .
+    ?NationalGrid_Zone qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Zone> .
+    ?NationalGrid_Zone <http://bike-csecu.com/datasets/energy/abox/mdAttribute#ZoneName> ?NationalGrid_ZoneName .
+
+    # Time properties
+    ?TimePeriod_Day qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Day> .
+    ?TimePeriod_Day <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InMonth> ?TimePeriod_Month .
+    ?TimePeriod_Month qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Month> .
+    ?TimePeriod_Month <http://bike-csecu.com/datasets/energy/abox/mdAttribute#InYear> ?TimePeriod_Year .
+    ?TimePeriod_Year qb4o:memberOf <http://bike-csecu.com/datasets/energy/abox/mdProperty#Year> .
+    ?TimePeriod_Year <http://bike-csecu.com/datasets/energy/abox/mdAttribute#YearId> ?Year_YearId .
+    ?TimePeriod_Year <http://bike-csecu.com/datasets/energy/abox/mdAttribute#YearName> ?TimePeriod_YearName .
+
+    # Filter for the year 2023
+    FILTER (REGEX (?Year_YearId, "2023", "i"))
+}
+GROUP BY ?NationalGrid_ZoneName ?TimePeriod_YearName
+ORDER BY ?NationalGrid_ZoneName ?TimePeriod_YearName
